@@ -24,7 +24,7 @@ export default function Crumbware(server) {
         }
     };
 
-    _server.on('request', (req, res) => {
+    _server.on('request', async (req, res) => {
         let chain = _handlers;
         let isErrorChain = false;
         let error = null;
@@ -51,7 +51,7 @@ export default function Crumbware(server) {
                     if (isErrorChain) {
                         params.unshift(error);
                     }
-                    middleware.handler(...params);
+                    await middleware.handler(...params);
                     if (res.writableEnded) {
                         break;
                     }
