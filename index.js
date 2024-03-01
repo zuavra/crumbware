@@ -1,6 +1,4 @@
-import { URL } from 'node:url';
-
-export default function Crumbware(server) {
+export default function Crumbware(server, URL) {
     const _server = server;
 
     const _handlers = [];
@@ -28,12 +26,11 @@ export default function Crumbware(server) {
         let chain = _handlers;
         let isErrorChain = false;
         let error = null;
-        req.URL = new URL(req.url, `http://${req.headers.host}`);
+        const parsedURL = new URL(req.url, `http://${req.headers.host}`);
 
         if (_errorHandlers.length === 0) {
-            this.use((error, req, res) => {
+            this.use((error, _, res) => {
                 res.statusCode = 500;
-                console.error('Default catch:', error);
             });
         }
 
@@ -43,9 +40,9 @@ export default function Crumbware(server) {
                 if (
                     middleware.route === null
                     ||
-                    typeof(middleware.route) === 'string' && middleware.route === req.URL.pathname
+                    typeof(middleware.route) === 'string' && middleware.route === parsedURL.pathname
                     ||
-                    middleware.route instanceof RegExp && middleware.route.test(req.URL.pathname)
+                    middleware.route instanceof RegExp && middleware.route.test(parsedURL.pathname)
                 ) {
                     const params = [req, res];
                     if (isErrorChain) {
