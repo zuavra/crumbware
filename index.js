@@ -43,6 +43,8 @@ export default function Crumbware(server, URL) {
                     typeof(middleware.route) === 'string' && middleware.route === parsedURL.pathname
                     ||
                     middleware.route instanceof RegExp && middleware.route.test(parsedURL.pathname)
+                    ||
+                    middleware.route instanceof Function && !!middleware.route(parsedURL, req, res)
                 ) {
                     const params = [req, res];
                     if (isErrorChain) {
