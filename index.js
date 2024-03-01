@@ -29,7 +29,7 @@ export default function Crumbware(server, URL) {
         const parsedURL = new URL(req.url, `http://${req.headers.host}`);
 
         if (_errorHandlers.length === 0) {
-            this.use((error, _, res) => {
+            this.use(null, ($, _, res) => {
                 res.statusCode = 500;
             });
         }
