@@ -4,9 +4,7 @@ export default function Crumbware(server, URL) {
     const _handlers = [];
     const _errorHandlers = [];
     
-    this.listen = function(port, host) {
-        _server.listen(port, host);
-    };
+    this.listen = (port, host) => _server.listen(port, host);
 
     this.use = function(route, ...handlers) {
         for (const handler of handlers) {
@@ -25,7 +23,7 @@ export default function Crumbware(server, URL) {
     _server.on('request', async (req, res) => {
         let chain = _handlers;
         let isErrorChain = false;
-        let error = null;
+        let lastError = null;
         const parsedURL = new URL(req.url, `http://${req.headers.host}`);
 
         if (_errorHandlers.length === 0) {
@@ -48,7 +46,7 @@ export default function Crumbware(server, URL) {
                 ) {
                     const params = [req, res];
                     if (isErrorChain) {
-                        params.unshift(error);
+                        params.unshift(lastError);
                     }
                     await middleware.handler(...params);
                     if (res.writableEnded) {
@@ -58,7 +56,7 @@ export default function Crumbware(server, URL) {
             }
             catch (e) {
                 console.error(e);
-                error = e;
+                lastError = e;
                 if (!isErrorChain) {
                     isErrorChain = true;
                     chain = _errorHandlers;
