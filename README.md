@@ -29,6 +29,10 @@ app.use("/", (request, response) => {
 app.use(new RegExp("^/foo/?$"), (request, response) => {
     console.log("This will only appear for routes that match the regex.");
 });
+app.use((_, request) => request.method === 'GET', (request, response) => {
+    // This will execute only for GET requests.
+    console.log(request.method);
+});
 app.use(null, (request, response) => {
     // This will execute for all routes, but after the other handlers.
     console.log(request.url);
@@ -75,6 +79,7 @@ Handlers can be skipped if their route specification doesn't match the request U
 * If the route is a `null` the handler is executed.
 * If the route is a string the handler is executed only if the route matches the request pathname verbatim.
 * If the route spec is an instance of RegExp the handler is executed only if the regex matches.
+* If the route spec is a function the handler is executed only if `!!f(route, request, response)`.
 
 When a request comes in:
 
