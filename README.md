@@ -13,10 +13,11 @@ It does not plan to add any other features such as method matching, URL paramete
 ````
 import http from 'node:http';
 import { URL } from 'node:url';
-import Crumbware from './index.js';
+import Crumbware from 'crumbware';
 
 // Use dependency injection, makes the module more decoupled and easy to test.
 const app = new Crumbware(http.createHttpServer(), URL);
+// You can optionally pass a custom console object as 3rd parameter. 
 
 // Let's add some middleware.
 app.use(null, (request, response) => {
@@ -24,13 +25,13 @@ app.use(null, (request, response) => {
     // I could set up a logger object here, for example.
 });
 app.use("/", (request, response) => {
-    console.log("This will only appear for route /.");
+    console.log("Exact string match. This will only appear for route /.");
 });
 app.use(new RegExp("^/foo/?$"), (request, response) => {
-    console.log("This will only appear for routes that match the regex.");
+    console.log("Regex match. This will appear for routes that match the expression.");
 });
 app.use((_, request) => request.method === 'GET', (request, response) => {
-    // This will execute only for GET requests.
+    // Function match. This will run only for GET requests.
     console.log(request.method);
 });
 app.use(null, (request, response) => {
@@ -79,20 +80,20 @@ Handlers can be skipped if their route specification doesn't match the request U
 * If the route is a `null` the handler is executed.
 * If the route is a string the handler is executed only if the route matches the request pathname verbatim.
 * If the route spec is an instance of RegExp the handler is executed only if the regex matches.
-* If the route spec is a function the handler is executed only if `!!f(route, request, response)`.
+* If the route spec is a function the handler is executed only if the return value of `f(route, request, response)` is truish (`!!`).
 
 When a request comes in:
 
-* Execution starts with the regular chain and can jump to the error chain once, when the first exception is throw.
-* Handlers on a chain are executed in order (if their route matches).
-* When an exception is thrown in a handler (of any kind) it gets logged to console and passed to the following error handlers.
-* If the user doesn't define any error handlers a default one is used, which sets response status to 500.
+* Execution starts with the regular chain and can jump to the error chain _once_, when the first exception is throw.
+* Handlers on a chain are executed in order (_if_ their route matches).
+* When an exception is thrown in any handler it gets logged to console and passed to all the subsequent error handlers.
+* If the user doesn't define any error handlers a default one is supplied, which sets response status to 500.
 * Execution stops if any handler has closed the writable buffer.
 * The writable buffer will be closed automatically after all the handlers if none of them did it, so that the request doesn't wait indefinitely.
 
 ### What is NOT done
 
-* The response status is only set (to 500) in one circumstance, if an exception was thrown by a handler and the user has not defined any error handlers. Please note that if the user DID define error handlers it's their responsibility to set the response code.
+* The response status is only set (to 500) in one circumstance, if an exception was thrown by a handler and the user has not defined any error handlers. If the user DID define error handlers it's their responsibility to set the response code.
 * The request and response are not altered in any way.
 * The chain logic does not match any request attributes other than path.
 * The chain logic does not extract URL or query parameters.
