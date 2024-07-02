@@ -1,6 +1,6 @@
 {
   "name": "crumbware",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A tiny web middleware framework for Node.js.",
   "main": "index.js",
   "scripts": {
