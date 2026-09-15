@@ -1,5 +1,6 @@
 export default function Crumbware(server, URL, customConsole) {
     const __server = server;
+    this.__server = __server;
     const __console = customConsole || console;
     const __normalHandlers = [];
     const __errorHandlers = [];
